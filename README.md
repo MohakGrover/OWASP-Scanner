@@ -39,7 +39,27 @@ python demo_target.py
 python main.py --demo --output demo_report.pdf --html-output demo_report.html --screenshots --verbose
 ```
 
-### 2) DVWA in Docker
+### 2) Pull DVWA from Docker
+```powershell
+ # Pull DVWA image
+  docker pull vulnerables/web-dvwa
+
+  # Run container on port 8888
+  docker run -d -p 8888:80 --name dvwa vulnerables/web-dvwa
+
+  # Stop container
+  docker stop dvwa
+
+  # Start container (after stopping)
+  docker start dvwa
+
+  # Remove container completely
+  docker rm dvwa
+
+  Once running, access DVWA at: http://127.0.0.1:8888
+```
+
+### 3)DVWA in Docker
 
 ```powershell
 python main.py --url http://127.0.0.1:3000 --profile dvwa --dvwa-login admin:password --output dvwa_report.pdf --html-output dvwa_report.html --screenshots --verbose --ignore-robots
