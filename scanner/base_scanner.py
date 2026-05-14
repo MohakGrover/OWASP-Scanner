@@ -58,6 +58,7 @@ class BaseScanner:
         code_example: str | None = None,
         approaches_tried: list[str] | None = None,
         response_snippet: str | None = None,
+        related_cwe_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         row: dict[str, Any] = {
             "id": vuln_id,
@@ -85,6 +86,8 @@ class BaseScanner:
             row["approaches_tried"] = approaches_tried
         if response_snippet:
             row["response_snippet"] = response_snippet
+        if related_cwe_ids:
+            row["related_cwe_ids"] = related_cwe_ids
 
         # Capture exploitation proof screenshot if enabled
         if self.context.screenshot_capture:

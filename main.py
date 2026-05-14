@@ -175,16 +175,13 @@ def main() -> None:
         raise SystemExit("No valid modules selected.")
 
     findings: list[dict] = []
-    with ThreadPoolExecutor(max_workers=min(6, len(selected))) as pool:
-        future_map = {pool.submit(run_module, name, scanner_map[name], context, client): name for name in selected}
-        for future in as_completed(future_map):
-            name = future_map[future]
-            try:
-                result = future.result()
-                findings.extend(result)
-                print(f"[+] {name}: completed ({len(result)} findings)")
-            except Exception as exc:
-                print(f"[!] {name}: module error, continuing ({exc})")
+    for name in selected:
+        try:
+            result = run_module(name, scanner_map[name], context, client)
+            findings.extend(result)
+            print(f"[+] {name}: completed ({len(result)} findings)")
+        except Exception as exc:
+            print(f"[!] {name}: module error, continuing ({exc})")
 
     findings.sort(key=lambda x: x.get("cvss_score", 0), reverse=True)
 

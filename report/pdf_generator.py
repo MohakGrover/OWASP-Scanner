@@ -123,12 +123,12 @@ def _severity_badge(severity: str) -> Table:
 
 
 def _severity_bar_chart(counts: Counter) -> Drawing:
-    drawing = Drawing(15 * cm, 6.5 * cm)
+    drawing = Drawing(14 * cm, 6 * cm)
     chart = VerticalBarChart()
     chart.x = 5
-    chart.y = 25
-    chart.height = 100
-    chart.width = 320
+    chart.y = 20
+    chart.height = 90
+    chart.width = 280
     ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
     chart.data = [[counts.get(k, 0) for k in ordered]]
     chart.categoryAxis.categoryNames = ordered
@@ -148,11 +148,11 @@ def _severity_bar_chart(counts: Counter) -> Drawing:
 def _severity_pie_chart(counts: Counter) -> Drawing:
     ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
     data = [max(0, counts.get(k, 0)) for k in ordered]
-    drawing = Drawing(7 * cm, 6.5 * cm)
+    drawing = Drawing(6.5 * cm, 6 * cm)
     pie = Pie()
     pie.x = 5
-    pie.y = 20
-    pie.height = pie.width = 90
+    pie.y = 15
+    pie.height = pie.width = 80
     if sum(data) == 0:
         pie.data = [1]
         pie.labels = ["No findings"]
@@ -175,8 +175,11 @@ def _owasp_top10_coverage_table(findings: list[dict], modules_run: list[str]) ->
         tested = "Yes" if was_category_tested(modules_run, code) else "No"
         mods = ", ".join(modules_exercising_code(modules_run, code)) or "-"
         n = finding_count_for_code(findings, code)
+        # Truncate long module lists for table
+        if len(mods) > 35:
+            mods = mods[:32] + "..."
         rows.append([_p(row["id"]), _p(row["name"]), tested, _p(mods), str(n)])
-    t = Table(rows, colWidths=[2 * cm, 5.2 * cm, 1.5 * cm, 4.5 * cm, 1.8 * cm])
+    t = Table(rows, colWidths=[1.8 * cm, 4.5 * cm, 1.3 * cm, 5.5 * cm, 1.5 * cm])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), NAVY),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -362,15 +365,15 @@ def build_pdf_report(output_path: str, target_url: str, findings: list[dict], me
 
     # Risk Overview
     story.append(Paragraph("Risk Overview", h2))
-    chart_row = Table([[_severity_pie_chart(counts), _severity_bar_chart(counts)]], colWidths=[8 * cm, 9 * cm])
+    chart_row = Table([[_severity_pie_chart(counts), _severity_bar_chart(counts)]], colWidths=[7 * cm, 9 * cm])
     chart_row.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
     story.append(chart_row)
-    story.append(Spacer(1, 0.45 * cm))
+    story.append(Spacer(1, 0.6 * cm))
     story.append(Paragraph("<b>OWASP Top 10 (2025) - coverage and findings</b>", body))
-    story.append(Spacer(1, 0.2 * cm))
+    story.append(Spacer(1, 0.3 * cm))
     story.append(_owasp_top10_coverage_table(findings, metadata.get("modules", [])))
-    story.append(Spacer(1, 0.35 * cm))
-    story.append(Paragraph("<i>\"Tested\"</i> means at least one enabled scanner maps to that OWASP category.", small))
+    story.append(Spacer(1, 0.4 * cm))
+    story.append(Paragraph("<i>&quot;Tested&quot;</i> means at least one enabled scanner maps to that OWASP category.", small))
     story.append(PageBreak())
 
     # Detailed Findings

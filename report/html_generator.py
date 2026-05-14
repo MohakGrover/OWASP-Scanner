@@ -9,11 +9,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-try:
-    from weasyprint import HTML as WeasyHTML
-    WEASYPRINT_AVAILABLE = True
-except ImportError:
-    WEASYPRINT_AVAILABLE = False
+WEASYPRINT_AVAILABLE = False
+_WeasyHTML = None
+
+
+def _check_weasyprint():
+    """Lazy check for WeasyPrint availability."""
+    global WEASYPRINT_AVAILABLE, _WeasyHTML
+    if WEASYPRINT_AVAILABLE and _WeasyHTML is not None:
+        return True
+    try:
+        from weasyprint import HTML as WeasyHTML
+        _WeasyHTML = WeasyHTML
+        WEASYPRINT_AVAILABLE = True
+        return True
+    except Exception:
+        return False
 
 
 class HTMLReportGenerator:
@@ -610,13 +621,14 @@ class HTMLReportGenerator:
 
     def generate_pdf_from_html(self, html_path: str, pdf_output: str) -> Optional[str]:
         """Convert HTML to PDF using WeasyPrint."""
-        if not WEASYPRINT_AVAILABLE:
+        if not _check_weasyprint():
+            print("[!] PDF conversion unavailable: WeasyPrint/GTK3 not installed")
             return None
 
         try:
             output_path = Path(pdf_output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            WeasyHTML(html_path).write_pdf(str(output_path))
+            _WeasyHTML(html_path).write_pdf(str(output_path))
             return str(output_path)
         except Exception as e:
             print(f"PDF generation failed: {e}")
